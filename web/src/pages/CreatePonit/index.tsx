@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import api from '../../services/api';
 
 import './styles.css';
 
 import logo from '../../assets/logo.svg';
 
+interface Item {
+  id: number;
+  title: string;
+  image_url: string;
+}
+
 const CreatePonit = () => {
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    api.get('items').then(response => {
+      setItems(response.data);
+    })
+  }, [])
   return (
     <div id="page-create-point">
       <header>
@@ -61,6 +76,15 @@ const CreatePonit = () => {
             <span>Selecione o endereço no mapa</span>
           </legend>
 
+          <MapContainer center={[-22.8610716, -42.0387353]} zoom={13}>
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            <Marker position={[-22.8610716, -42.0387353]} />
+          </MapContainer>
+
           <div className="field-group">
             <div className="field">
               <label htmlFor="uf">Estado (UF)</label>
@@ -85,30 +109,12 @@ const CreatePonit = () => {
           </legend>
 
           <ul className="items-grid">
-            <li className="selected"> 
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Eletrônicos"/>
-              <span>Eletrônicos</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Eletrônicos"/>
-              <span>Eletrônicos</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Eletrônicos"/>
-              <span>Eletrônicos</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Eletrônicos"/>
-              <span>Eletrônicos</span>
-            </li>
-            <li className="selected">
-              <img src="http://localhost:3333/uploads/oleo.svg" alt="Óleo"/>
-              <span>Óleo</span>
-            </li>
-            <li>
-              <img src="http://localhost:3333/uploads/eletronicos.svg" alt="Eletrônicos"/>
-              <span>Eletrônicos</span>
-            </li>
+            {items.map(item => (
+              <li key={item.id}> 
+                <img src={item.image_url} alt={item.title} />
+                <span>{item.title}</span>
+              </li>
+            ))}
           </ul>
 
         </fieldset>
@@ -116,7 +122,7 @@ const CreatePonit = () => {
         <button type="submit">
           Cadastrar ponto de coleta
         </button>
-        
+
       </form>
     </div>
   );
